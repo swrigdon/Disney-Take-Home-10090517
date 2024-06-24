@@ -37,7 +37,7 @@ function findSegment(res, knownLength, position) {
 
     function tryNext(start, end, index) {
         // Binary Search the Database
-        makeDatabaseRequest(`/query?index=${index}`, (data) => {
+        makeDatabaseRequest(`/query?index=${index}&position=${position}`, (data) => {
             const { result } = data;
 
             if (result.start <= position && position <= result.end) {
