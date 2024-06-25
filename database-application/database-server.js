@@ -1,8 +1,8 @@
 const http = require('http');
 
 const PORT = 8901;
-const DATABASE_SIZE = 2000;
-const NUM_SHARDS = 13;
+const DATABASE_SIZE = 20000000;
+const NUM_SHARDS = 1300;
 
 // The "database" is a list of ordered lists (or "shards").
 const shardList = [[]];
@@ -39,13 +39,30 @@ function createFakeMediaSegmentsData() {
 }
 
 function getShardIndex(start, end, position){
+    if (start > end){
+        return -1;
+    }
     let mid = Math.floor((end - start) / 2) + start;
     if (position >= shardList[mid][0].start && position <= shardList[mid][shardList[mid].length - 1].end){
         return mid;
     } else if (position < shardList[mid][0].start){
-        return getShardIndex(start, mid, position);
+        return getShardIndex(start, mid - 1, position);
     } else {
-        return getShardIndex(mid, end, position);
+        return getShardIndex(mid + 1, end, position);
+    }
+}
+
+function getSegmentIndex(start, end, position, shardIndex){
+    if (start > end){
+        return -1;
+    }
+    let mid = Math.floor((end - start) / 2) + start;
+    if (position >= shardList[shardIndex][mid].start && position <= shardList[shardIndex][mid].end){
+        return mid;
+    } else if (position < shardList[shardIndex][mid].start){
+        return getSegmentIndex(start, mid - 1, position, shardIndex);
+    } else {
+        return getSegmentIndex(mid + 1, end, position, shardIndex);
     }
 }
 
@@ -61,15 +78,14 @@ const server = http.createServer((req, res) => {
         response.result = {
             start: shardList[0][0].start,
             end: shardList[shardList.length - 1][shardList[shardList.length - 1].length - 1].end,
-            length: shardList.reduce((prev, curr)=> Math.max(prev, curr.length), 0),
-            shardCount: NUM_SHARDS
+            length: shardList.reduce((prev, curr)=> Math.max(prev, curr.length), 0)
         };
     } else if (url.pathname === '/query') {
         const position = parseInt(url.searchParams.get('position'));
-        const index = parseInt(url.searchParams.get('index'), 10);
         const shardIndex = getShardIndex(0, shardList.length - 1, position);
+        const index = getSegmentIndex(0, shardList[shardIndex].length - 1, position, shardIndex);
         let result = null;
-        if (index < shardList[shardIndex].length) {
+        if (index < shardList[shardIndex].length && index !== -1) {
             result = shardList[shardIndex][index];
         }
 
