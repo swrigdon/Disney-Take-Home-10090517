@@ -3,6 +3,7 @@ const http = require('http');
 const PORT = 8901;
 const DATABASE_SIZE = 20000000;
 const NUM_SHARDS = 1300;
+const ENTRIES_PER_SHARD = Math.ceil(DATABASE_SIZE / NUM_SHARDS);
 
 // The "database" is a list of ordered lists (or "shards").
 const shardList = [[]];
@@ -31,7 +32,7 @@ function createFakeMediaSegmentsData() {
 
         // Divide the database into evenly distributed chunks based on total database size
         // and the max number of shards specified
-        if (shardList[shardIndex].length >= Math.round(DATABASE_SIZE / NUM_SHARDS) && shardList.length * shardList[shardIndex].length < DATABASE_SIZE){
+        if (shardList[shardIndex].length >= ENTRIES_PER_SHARD){
             shardList.push([]);
             shardIndex ++;
         }
@@ -78,15 +79,15 @@ const server = http.createServer((req, res) => {
         response.result = {
             start: shardList[0][0].start,
             end: shardList[shardList.length - 1][shardList[shardList.length - 1].length - 1].end,
-            length: shardList.reduce((prev, curr)=> Math.max(prev, curr.length), 0)
+            length: ENTRIES_PER_SHARD
         };
     } else if (url.pathname === '/query') {
         const position = parseInt(url.searchParams.get('position'));
         const shardIndex = getShardIndex(0, shardList.length - 1, position);
-        const index = getSegmentIndex(0, shardList[shardIndex].length - 1, position, shardIndex);
+        const queriedIndex = getSegmentIndex(0, shardList[shardIndex].length - 1, position, shardIndex);
         let result = null;
-        if (index < shardList[shardIndex].length && index !== -1) {
-            result = shardList[shardIndex][index];
+        if (queriedIndex < shardList[shardIndex].length && queriedIndex !== -1) {
+            result = shardList[shardIndex][queriedIndex];
         }
 
         if (result) {

@@ -41,23 +41,6 @@ function findSegment(res, knownLength, position) {
             return sendJSONResponse(res, 200, data);
         } 
     });
-
-    // function tryNext(start, end, index) {
-    //     // Binary Search the Database
-    //     makeDatabaseRequest(`/query?index=${index}&position=${position}`, (data) => {
-    //         const { result } = data;
-
-    //         if (result.start <= position && position <= result.end) {
-    //             return sendJSONResponse(res, 200, data);
-    //         } else if (result.start > position) {
-    //             tryNext(start, index, Math.floor((index - start) / 2) + start);
-    //         } else if (result.end < position) {
-    //             tryNext(index, end, Math.floor((end - index) / 2) + index);
-    //         }
-    //     });
-    // }
-
-    // tryNext(0, knownLength, Math.floor(knownLength / 2));
 }
 
 function getRange(res) {
