@@ -35,22 +35,28 @@ function makeDatabaseRequest(pathname, callback) {
 
 function findSegment(res, knownLength, position) {
 
-    function tryNext(start, end, index) {
-        // Binary Search the Database
-        makeDatabaseRequest(`/query?index=${index}`, (data) => {
+    // Binary Search the Database
+    function tryNext(start, end) {
+        if (start > end){
+            return null;
+        }
+
+        let mid = Math.floor((end - start) / 2) + start;
+
+        makeDatabaseRequest(`/query?index=${mid}`, (data) => {
             const { result } = data;
 
             if (result.start <= position && position <= result.end) {
                 return sendJSONResponse(res, 200, data);
             } else if (result.start > position) {
-                tryNext(start, index, Math.floor((index - start) / 2) + start);
+                return tryNext(start, mid - 1);
             } else if (result.end < position) {
-                tryNext(index, end, Math.floor((end - index) / 2) + index);
+                return tryNext(mid + 1, end);
             }
         });
     }
 
-    tryNext(0, knownLength, Math.floor(knownLength / 2));
+    return tryNext(0, knownLength);
 }
 
 function getRange(res) {
