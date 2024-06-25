@@ -1,7 +1,7 @@
 const http = require('http');
 
 const PORT = 8901;
-const DATABASE_SIZE = 2000;
+const DATABASE_SIZE = 20000000;
 const NUM_SHARDS = 13;
 
 // The "database" is a list of ordered lists (or "shards").
@@ -39,13 +39,17 @@ function createFakeMediaSegmentsData() {
 }
 
 function getShardIndex(start, end, position){
+    if(start > end){
+        return -1;
+    }
+
     let mid = Math.floor((end - start) / 2) + start;
     if (position >= shardList[mid][0].start && position <= shardList[mid][shardList[mid].length - 1].end){
         return mid;
     } else if (position < shardList[mid][0].start){
-        return getShardIndex(start, mid, position);
+        return getShardIndex(start, mid - 1, position);
     } else {
-        return getShardIndex(mid, end, position);
+        return getShardIndex(mid + 1, end, position);
     }
 }
 
