@@ -28,8 +28,6 @@ In this repo, you will find that the structure of the project has not changed fr
 ```
 - `DB-Binary-Search_DB-Sharding` - An additional attempt at shortening the runtime by offloading all database seeking to the database server and making a single call from the application server per position. The application server passes the position to the database server, and the database seeks and returns the segment that contains the provided position, if it exists. The logged runtime for 20 million records and 13 shards is:
 ```
-DB Binary Search by Index + DB Sharding
-DB Size: 20000000, Shards: 13
 {
     "min": 12,
     "max": 18,
