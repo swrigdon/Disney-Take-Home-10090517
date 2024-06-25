@@ -33,7 +33,7 @@ function makeDatabaseRequest(pathname, callback) {
     });
 }
 
-function findSegment(res, knownLength, position) {
+function findSegment(res, position) {
 
     makeDatabaseRequest(`/query?position=${position}`, (data)=>{
         const {result} = data;
@@ -71,7 +71,7 @@ const server = http.createServer((req, res) => {
         console.log('get media segment for position', position);
 
         if (!Number.isNaN(position)) {
-            return findSegment(res, knownListLength, position);
+            return findSegment(res, position);
         }
     }
 
