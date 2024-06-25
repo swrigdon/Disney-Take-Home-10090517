@@ -1,7 +1,7 @@
 const http = require('http');
 
 const PORT = 8901;
-const DATABASE_SIZE = 2000;
+const DATABASE_SIZE = 20000000;
 
 // The "database" is simply an ordered list of media chunk metadata objects.
 const orderedList = [];
